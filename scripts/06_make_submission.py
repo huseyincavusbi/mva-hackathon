@@ -32,13 +32,16 @@ def main() -> None:
                     help="optional: emit first two rows as ONE compound-het row using "
                          "chrom_2/pos_2/ref_2/alt_2 (schema supports compound-het pairs; "
                          "half-credit if only one allele recovered). Format: chrom2,pos2,ref2,alt2")
+    ap.add_argument("--min-epcr", type=float, default=0.5,
+                    help="confidence floor: non-pair rows below this EPCR are "
+                         "not emitted (schema allows UP TO 10 rows, not exactly 10)")
     args = ap.parse_args()
 
     with open(args.inp) as f:
         rows = list(csv.DictReader(f, delimiter="\t"))
 
-    if len(rows) > 11:
-        rows = rows[:11]
+    if len(rows) > 10:
+        rows = rows[:10]
 
     pair = None
     if args.pair:
@@ -86,6 +89,11 @@ def main() -> None:
             write_row(r1, chrom2=f"chr{c2}" if not c2.startswith("chr") else c2,
                       pos2=p2, ref2=r2a, alt2=a2a, epcr_=1.0)
         for r in rows:
+            try:
+                if float(r.get("epcr", 0) or 0) < args.min_epcr:
+                    continue
+            except ValueError:
+                continue
             write_row(r)
 
     print(f"submission written: {args.out} ({written} rows)")
