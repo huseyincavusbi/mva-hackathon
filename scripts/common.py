@@ -14,7 +14,7 @@ TBI = DATA_DIR / "WGS_EX2312012_HGWCNDSX7.vcf.gz.tbi"
 FASTQ_PATTERN = DATA_DIR / "WGS_EX2312012_HGWCNDSX7_S16_L00{lanes}_R{read}_001.fastq.gz"
 NOTES_DIR = ROOT_DIR / "notes"
 OUT_DIR = NOTES_DIR  # analysis outputs land here
-PROBAND_ID = "WGS_EX2312012"   # from VCF #CHROM sample column — the schema's proband_id
+PROBAND_ID = "PROBAND01"   # as required by the Track 1 scorer (not the VCF sample column)
 
 os.makedirs(OUT_DIR, exist_ok=True)
 
