@@ -1,0 +1,11 @@
+[project]
+name = "mva-hackathon"
+version = "0.1.0"
+description = "Rare Disease Real Kid: MVA Hackathon 2026 — Track 1 variant prioritization pipeline"
+requires-python = ">=3.12"
+dependencies = [
+    "pysam>=0.22",
+    "pandas>=2.0",
+    "numpy>=1.26",
+    "requests>=2.31",
+]
