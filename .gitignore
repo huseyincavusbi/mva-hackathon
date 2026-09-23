@@ -1,0 +1,24 @@
+# Gated hackathon data — never share (DTA terms)
+data/
+*.fastq.gz
+*.fastq
+*.vcf.gz
+*.vcf.gz.tbi
+*.vcf
+
+# Local working notes & derived analysis tables — kept local only
+notes/
+
+# Organizer template / local reference material
+methods_description_form.xlsx
+info.webarchive
+*.pdf
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.uvcache/
+
+# macOS
+.DS_Store
