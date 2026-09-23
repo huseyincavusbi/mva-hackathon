@@ -27,8 +27,18 @@ from common import GENE_PANEL, NOTES_DIR
 LOF_TERMS = {"stop_gained", "frameshift_variant", "splice_acceptor_variant",
              "splice_donor_variant", "start_lost", "stop_lost", "exon_loss_variant"}
 MISSENSE_TERMS = {"missense_variant", "inframe_deletion", "inframe_insertion",
-                  "protein_altering_variant", "splice_region_variant"}
+                   "protein_altering_variant", "splice_region_variant"}
 SYNONYMOUS_TERMS = {"synonymous_variant"}
+FUNCTIONAL_TERMS = LOF_TERMS | MISSENSE_TERMS
+
+
+def is_functional(cons: str) -> bool:
+    """Functional gate: only protein-altering or splice-region consequences
+    can be causal candidates. Pure intronic/ncRNA/downstream/upstream calls
+    (e.g. repeat artifacts) are excluded before scoring so they can no
+    longer inflate the ranked list."""
+    terms = {t.strip() for t in cons.split(",") if t.strip()}
+    return bool(terms & FUNCTIONAL_TERMS)
 
 # Weights for evidence axes (heuristic; calibrate after leaderboard feedback)
 W = {"phenotype": 0.30, "consequence": 0.25, "rarity": 0.20,
@@ -48,11 +58,12 @@ def consequence_score(cons: str) -> float:
 
 def rarity_score(gnomad_af: str) -> float:
     if not gnomad_af:
-        return 0.9  # absent from gnomAD = most likely rare/causal
+        return 0.5  # unknown, not evidence of rarity (blank means
+                    # unannotated, not absent from gnomAD)
     try:
         af = float(gnomad_af)
     except ValueError:
-        return 0.9
+        return 0.5
     if af == 0:
         return 1.0
     if af < 1e-4:
@@ -127,6 +138,8 @@ def main() -> None:
     with open(args.inp) as f:
         reader = csv.DictReader(f, delimiter="\t")
         rows = [dict(r) for r in reader]
+
+    rows = [r for r in rows if is_functional(r.get("vep_consequence", ""))]
 
     for r in rows:
         r["score"] = score_variant(r)
